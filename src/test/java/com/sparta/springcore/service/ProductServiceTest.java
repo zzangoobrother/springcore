@@ -3,6 +3,7 @@ package com.sparta.springcore.service;
 import com.sparta.springcore.dto.ProductMypriceRequestDto;
 import com.sparta.springcore.dto.ProductRequestDto;
 import com.sparta.springcore.model.Product;
+import com.sparta.springcore.repository.FolderRepository;
 import com.sparta.springcore.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,9 @@ import static org.mockito.Mockito.when;
 class ProductServiceTest {
     @Mock
     ProductRepository productRepository;
+
+    @Mock
+    FolderRepository folderRepository;
 
     @Test
     @DisplayName("관심 상품 희망가 - 최저가 이상으로 변경")
@@ -42,7 +46,7 @@ class ProductServiceTest {
 
         Product product = new Product(requestProductDto, userId);
 
-        ProductService productService = new ProductService(productRepository);
+        ProductService productService = new ProductService(productRepository, folderRepository);
         when(productRepository.findById(productId))
                 .thenReturn(Optional.of(product));
 
@@ -64,7 +68,7 @@ class ProductServiceTest {
                 myprice
         );
 
-        ProductService productService = new ProductService(productRepository);
+        ProductService productService = new ProductService(productRepository, folderRepository);
 
         // when
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
