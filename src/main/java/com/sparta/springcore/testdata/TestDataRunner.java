@@ -1,9 +1,11 @@
 package com.sparta.springcore.testdata;
 
 import com.sparta.springcore.dto.ItemDto;
+import com.sparta.springcore.model.Folder;
 import com.sparta.springcore.model.Product;
 import com.sparta.springcore.model.User;
 import com.sparta.springcore.model.UserRoleEnum;
+import com.sparta.springcore.repository.FolderRepository;
 import com.sparta.springcore.repository.ProductRepository;
 import com.sparta.springcore.repository.UserRepository;
 import com.sparta.springcore.service.ItemSearchService;
@@ -30,6 +32,9 @@ public class TestDataRunner implements ApplicationRunner {
     ProductRepository productRepository;
 
     @Autowired
+    FolderRepository folderRepository;
+
+    @Autowired
     UserRepository userRepository;
 
     @Autowired
@@ -43,6 +48,12 @@ public class TestDataRunner implements ApplicationRunner {
         // 테스트 User 생성
         User testUser = new User("슈가", passwordEncoder.encode("123"), "sugar@sparta.com", UserRoleEnum.USER);
         testUser = userRepository.save(testUser);
+
+        User testUser2 = new User("홍길동", passwordEncoder.encode("123"), "hong@sparta.com", UserRoleEnum.USER);
+        userRepository.save(testUser2);
+
+        User testAdminUser = new User("세종대왕", passwordEncoder.encode("123"), "seojong@sparta.com", UserRoleEnum.ADMIN);
+        userRepository.save(testAdminUser);
 
         // 테스트 User 의 관심상품 등록
         // 검색어 당 관심상품 10개 등록
@@ -84,6 +95,9 @@ public class TestDataRunner implements ApplicationRunner {
         }
 
         productRepository.saveAll(productList);
+
+        Folder folder = new Folder(searchWord, user);
+        folderRepository.save(folder);
     }
 
     public int getRandomNumber(int min, int max) {

@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,22 +25,28 @@ public class FolderService {
         this.productRepository = productRepository;
     }
 
+    // 로그인한 회원에 폴더들 등록
+    @Transactional
     public List<Folder> addFolders(List<String> folderNames, User user) {
-        List<Folder> findFolderList = folderRepository.findAllByUserAndNameIn(user, folderNames);
-
-        List<Folder> folders = new ArrayList<>();
+        List<Folder> savedFolderList = new ArrayList<>();
         for (String folderName : folderNames) {
-            if (folders.stream().anyMatch(f -> f.getName().equals(folderName))) {
-                continue;
-            }
-
-            if (!isSameFolderName(folderName, findFolderList)) {
-                Folder folder = new Folder(folderName.trim(), user);
-                folders.add(folder);
-            }
+            Folder folder = createFolderOrThrow(folderName, user);
+            savedFolderList.add(folder);
         }
 
-        return folderRepository.saveAll(folders);
+        return savedFolderList;
+    }
+
+    public Folder createFolderOrThrow(String folderName, User user) {
+        // 입력으로 들어온 폴더 이름이 이미 존재하는 경우, Exception 발생
+        boolean isExistFolder = folderRepository.existsByUserAndName(user, folderName);
+        if (isExistFolder) {
+            throw new IllegalArgumentException("중복된 폴더명을 제거해 주세요! 폴더명: " + folderName);
+        }
+
+        // 폴더명 저장
+        Folder folder = new Folder(folderName, user);
+        return folderRepository.save(folder);
     }
 
     private boolean isSameFolderName(String folderName, List<Folder> findFolderList) {
